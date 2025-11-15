@@ -6,6 +6,7 @@ import { Canvas } from "@react-three/fiber";
 import Loading from "./Loading";
 import Scene from "./Scene";
 import Restart from "./Restart";
+import useSound from "use-sound";
 
 import {
   Environment,
@@ -69,6 +70,12 @@ const Home: React.FC = () => {
   const [finalGameTime, setFinalGameTime] = useState(0);
   const [highScore, setHighScore] = useState<number>(0);
 
+  //usesound hook
+  const [play, { stop }] = useSound("/sounds/restaurantscene.mp3", {
+    loop: true,
+    volume: 0.5,
+  });
+
   // Load high score from localStorage after mount
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -99,6 +106,7 @@ const Home: React.FC = () => {
     setFinalGameTime(0);
     const firstRequest = generateRequest();
     setCurrentRequest(firstRequest);
+    play();
   };
 
   const handleTableClick = (tableNumber: number) => {
@@ -156,6 +164,7 @@ const Home: React.FC = () => {
             setGameStarted(false);
             setCurrentRequest(null);
             setPendingRequests([]);
+            stop();
           }
           return newCount;
         });
@@ -219,6 +228,7 @@ const Home: React.FC = () => {
     setMissedCount(0);
     setGameStartTime(null);
     setFinalGameTime(0);
+    stop();
   };
 
   return (
@@ -239,9 +249,6 @@ const Home: React.FC = () => {
           </>
         ) : gameStarted && !gameOver ? (
           <>
-            {/* <div className="game-Header-P">
-              CLICK THE TABLE NUMBER TO HELP THE GUEST
-            </div> */}
             <div className="game-Header-P">MISSED TABLES: {missedCount}/10</div>
             <div className="game-Requests">
               {currentRequest &&
@@ -270,7 +277,6 @@ const Home: React.FC = () => {
               resize={{ scroll: false }}
             >
               <Suspense fallback={<Loading />}>
-                {/* +++ MODIFIED: Pass currentRequest to Scene */}
                 <Scene
                   onTableClick={handleTableClick}
                   currentRequest={currentRequest}
