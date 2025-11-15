@@ -170,7 +170,7 @@
 
   @media only screen and (max-width: 57.5em) {
     font-size: 1.5rem;
-    padding-bottom: 1rem;
+    padding-bottom: 1.5rem;
   }
 }
 
@@ -185,7 +185,7 @@
   padding-bottom: 1rem;
 
   @media only screen and (max-width: 57.5em) {
-    font-size: 1.5rem;
+    font-size: 0.8rem;
     padding-bottom: 1rem;
   }
 }
@@ -224,4 +224,10 @@
   /* text-decoration: none; */
   display: inline-block;
   font-size: 1.2rem;
+
+  @media only screen and (max-width: 57.5em) {
+    font-size: 1rem;
+    padding: 1rem;
+    margin: 1.5rem;
+  }
 }

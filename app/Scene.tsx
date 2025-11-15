@@ -170,8 +170,8 @@ const Scene: FC<SceneProps> = ({
   return (
     <>
       <OrbitControls
-        minDistance={12.5}
-        maxDistance={20}
+        minDistance={11.5}
+        maxDistance={17}
         enablePan={false}
         enableRotate={true}
         minAzimuthAngle={-Math.PI / 3}
@@ -234,7 +234,7 @@ const Scene: FC<SceneProps> = ({
           <primitive
             object={scene}
             scale={1}
-            position={[0, 5.33, 12]}
+            position={[0, 1.2, 2.3]}
             onClick={handleClick}
             onPointerOver={() => setHovered(true)}
             onPointerOut={() => setHovered(false)}

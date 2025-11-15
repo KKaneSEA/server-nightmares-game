@@ -30,12 +30,12 @@ const REQUEST_TYPES = [
   "wants to order wine",
   "needs to order dinner",
   "needs to order an appetizer",
-  "wants a side of ketchup",
+  "wants a side of aioli",
   "is wondering where their food is",
   "wants to turn the AC on",
   "wants to turn the AC down",
   "wants to speak to the chef",
-  "changed their mind about their order",
+  "changed their mind about dinnerr",
   "wants more bread",
   "needs emotional support",
   "spilled their drink all over the menu",
@@ -230,15 +230,18 @@ const Home: React.FC = () => {
             <div className="game-Header-P">
               10 UNHAPPY GUESTS AND YOU'RE OUT
             </div>
+            <div className="game-Header-P">
+              CLICK THE TABLE NUMBER TO HELP THE GUEST
+            </div>
             <button onClick={startGame} className="gameStart-Button">
               START GAME
             </button>
           </>
         ) : gameStarted && !gameOver ? (
           <>
-            <div className="game-Header-P">
+            {/* <div className="game-Header-P">
               CLICK THE TABLE NUMBER TO HELP THE GUEST
-            </div>
+            </div> */}
             <div className="game-Header-P">MISSED TABLES: {missedCount}/10</div>
             <div className="game-Requests">
               {currentRequest &&
