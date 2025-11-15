@@ -262,8 +262,8 @@ const Home: React.FC = () => {
           ) : (
             <Canvas
               camera={{
-                position: [0, -1, 0],
-                fov: 90,
+                position: [0, 50.5, 0],
+                fov: 70,
                 near: 1,
                 far: 100,
               }}
