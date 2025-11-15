@@ -36,7 +36,7 @@ const REQUEST_TYPES = [
   "wants to turn the AC down",
   "wants to speak to the chef",
   "changed their mind about their order",
-  "wants gluten-free bread",
+  "wants more bread",
   "needs emotional support",
   "spilled their drink all over the menu",
   "is arguing about the bill already",
@@ -55,81 +55,160 @@ const Home: React.FC = () => {
   const [currentRequest, setCurrentRequest] = useState<{
     table: number;
     request: string;
+    timestamp: number;
   } | null>(null);
 
   const [pendingRequests, setPendingRequests] = useState<
     Array<{ table: number; request: string }>
   >([]);
 
+  const [missedCount, setMissedCount] = useState(0);
+
   const [gameOver, setGameOver] = useState(false);
+  const [gameStartTime, setGameStartTime] = useState<number | null>(null);
+  const [finalGameTime, setFinalGameTime] = useState(0);
+  const [highScore, setHighScore] = useState<number>(0);
+
+  // Load high score from localStorage after mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("serverNightmaresHighScore");
+      if (saved) {
+        setHighScore(parseInt(saved));
+      }
+    }
+  }, []);
 
   const generateRequest = () => {
     const randomTable = Math.floor(Math.random() * 6) + 1;
     const randomRequestType =
       REQUEST_TYPES[Math.floor(Math.random() * REQUEST_TYPES.length)];
-    return { table: randomTable, request: randomRequestType };
+    return {
+      table: randomTable,
+      request: randomRequestType,
+      timestamp: Date.now(),
+    };
   };
 
   const startGame = () => {
     setGameStarted(true);
     setGameOver(false);
     setPendingRequests([]);
+    setMissedCount(0);
+    setGameStartTime(Date.now());
+    setFinalGameTime(0);
     const firstRequest = generateRequest();
     setCurrentRequest(firstRequest);
   };
 
   const handleTableClick = (tableNumber: number) => {
-    if (!gameStarted || gameOver) return;
+    if (!gameStarted || gameOver || !currentRequest) return;
 
-    if (currentRequest && currentRequest.table === tableNumber) {
-      // Correct table clicked - clear current request
+    const now = Date.now();
+    const age = now - currentRequest.timestamp;
+
+    // Only process if request is less than 2 seconds old and matches
+    if (currentRequest.table === tableNumber && age < 2000) {
+      // Correct table clicked in time - clear current request
       if (pendingRequests.length > 0) {
-        setCurrentRequest(pendingRequests[0]);
+        const nextRequest = { ...pendingRequests[0], timestamp: Date.now() };
+        setCurrentRequest(nextRequest);
         setPendingRequests((prev) => prev.slice(1));
       } else {
-        // CHANGED: Immediately generate new request when completed
+        // No pending requests - generate new one
         const newRequest = generateRequest();
         setCurrentRequest(newRequest);
       }
     }
   };
 
-  // CHANGED: Request generation interval
+  // +++ Effect to check for expired requests
+  useEffect(() => {
+    if (!gameStarted || gameOver || !currentRequest) return;
+
+    const checkExpiration = () => {
+      const now = Date.now();
+      const age = now - currentRequest.timestamp;
+
+      // If current request is older than 2 seconds, it's a permanent miss
+      if (age >= 2000) {
+        // Increment missed count
+        setMissedCount((prev) => {
+          const newCount = prev + 1;
+          // Check if game over
+          if (newCount >= 10) {
+            // Calculate final time
+            const finalTime = gameStartTime ? Date.now() - gameStartTime : 0;
+            setFinalGameTime(finalTime);
+
+            // Update high score if current time is better
+            if (finalTime > highScore) {
+              setHighScore(finalTime);
+              if (typeof window !== "undefined") {
+                localStorage.setItem(
+                  "serverNightmaresHighScore",
+                  finalTime.toString()
+                );
+              }
+            }
+
+            setGameOver(true);
+            setGameStarted(false);
+            setCurrentRequest(null);
+            setPendingRequests([]);
+          }
+          return newCount;
+        });
+
+        // Move to next request or generate new one
+        if (pendingRequests.length > 0) {
+          const nextRequest = { ...pendingRequests[0], timestamp: Date.now() };
+          setCurrentRequest(nextRequest);
+          setPendingRequests((prev) => prev.slice(1));
+        } else {
+          const newRequest = generateRequest();
+          setCurrentRequest(newRequest);
+        }
+      }
+    };
+
+    // Check every 100ms
+    const intervalId = setInterval(checkExpiration, 100);
+
+    return () => clearInterval(intervalId);
+  }, [gameStarted, gameOver, currentRequest, pendingRequests]);
+
   useEffect(() => {
     if (!gameStarted || gameOver) return;
 
     const generateNewRequest = () => {
       const newRequest = generateRequest();
 
-      // CHANGED: Always replace current request
       if (currentRequest !== null) {
-        // If there's a current request, move it to pending before replacing
         setPendingRequests((prev) => {
-          const updated = [...prev, currentRequest];
-          // Check if backlog exceeds 10
-          if (updated.length >= 10) {
-            setGameOver(true);
-            setGameStarted(false);
-            setCurrentRequest(null);
-            return [];
-          }
+          // Just add to pending queue, don't use timestamp here
+          const updated = [
+            ...prev,
+            { table: currentRequest.table, request: currentRequest.request },
+          ];
           return updated;
         });
       }
 
-      // Set the new request as current
       setCurrentRequest(newRequest);
     };
 
-    // CHANGED: Random interval between 1-2 seconds
     const scheduleNext = () => {
-      const randomDelay = Math.random() * 1500 + 2500; // 1500-3000ms
+      const randomDelay = Math.random() * 1500 + 2500;
       return setTimeout(generateNewRequest, randomDelay);
     };
 
-    const timeoutId = scheduleNext();
-
-    return () => clearTimeout(timeoutId);
+    // Only schedule if we already have a current request
+    // (startGame already creates the first one)
+    if (currentRequest) {
+      const timeoutId = scheduleNext();
+      return () => clearTimeout(timeoutId);
+    }
   }, [gameStarted, gameOver, currentRequest, pendingRequests]);
 
   const restartGame = () => {
@@ -137,6 +216,9 @@ const Home: React.FC = () => {
     setGameStarted(false);
     setCurrentRequest(null);
     setPendingRequests([]);
+    setMissedCount(0);
+    setGameStartTime(null);
+    setFinalGameTime(0);
   };
 
   return (
@@ -157,9 +239,7 @@ const Home: React.FC = () => {
             <div className="game-Header-P">
               CLICK THE TABLE NUMBER TO HELP THE GUEST
             </div>
-            <div className="game-Header-P">
-              MISSED TABLES: {pendingRequests.length}/10
-            </div>
+            <div className="game-Header-P">MISSED TABLES: {missedCount}/10</div>
             <div className="game-Requests">
               {currentRequest &&
                 `Table ${currentRequest.table} ${currentRequest.request}`}
@@ -171,7 +251,11 @@ const Home: React.FC = () => {
       <div className="threeD-Container">
         <div className="threeD-Portal">
           {gameOver ? (
-            <Restart restartGame={restartGame} />
+            <Restart
+              restartGame={restartGame}
+              currentGameTime={finalGameTime}
+              highScore={highScore}
+            />
           ) : (
             <Canvas
               camera={{
@@ -183,7 +267,11 @@ const Home: React.FC = () => {
               resize={{ scroll: false }}
             >
               <Suspense fallback={<Loading />}>
-                <Scene onTableClick={handleTableClick} />
+                {/* +++ MODIFIED: Pass currentRequest to Scene */}
+                <Scene
+                  onTableClick={handleTableClick}
+                  currentRequest={currentRequest}
+                />
               </Suspense>
             </Canvas>
           )}
@@ -194,70 +282,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-
-//before
-
-//  "use client";
-
-// import "./App.css";
-// import { Suspense } from "react";
-// import { Canvas } from "@react-three/fiber";
-// import Loading from "./Loading";
-// import Scene from "./Scene";
-// import Restart from "./Restart";
-
-// import {
-//   Environment,
-//   KeyboardControls,
-//   useKeyboardControls,
-// } from "@react-three/drei";
-// import {
-//   Debug,
-//   RigidBody,
-//   Physics,
-//   CylinderCollider,
-//   CuboidCollider,
-//   BallCollider,
-//   RapierRigidBody,
-//   useRapier,
-// } from "@react-three/rapier";
-
-// const Home: React.FC = () => {
-//   return (
-//     <div className="game-Container">
-//       <header className="game-Header">
-//         <h1 className="game-Header-Title">SERVER NIGHTMARES</h1>
-//         <div className="game-Header-P">click on the table or number</div>
-//         <div className="game-Requests">Table 2 needs water</div>
-//       </header>
-
-//       <div className="threeD-Container">
-//         <div className="threeD-Portal">
-//           <Canvas
-//             camera={{
-//               position: [0, -1, 0], // Position camera in front of the scene
-//               fov: 90,
-//               near: 1,
-//               far: 100,
-//             }}
-//             resize={{ scroll: false }}
-//           >
-//             <Suspense
-//               fallback={
-//                 <Loading
-//                 // Example props if your Loading component supports them
-//                 // position={[1, -2, -2.5] as [number, number, number]}
-//                 // scale={[1, 1, 1] as [number, number, number]}
-//                 />
-//               }
-//             >
-//               <Scene />
-//             </Suspense>
-//           </Canvas>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Home;

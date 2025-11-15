@@ -174,9 +174,25 @@
   }
 }
 
+.gameOver-Time {
+  color: #c81c11;
+  font-family: "Sono", sans-serif;
+  font-weight: 500;
+
+  font-size: 1rem;
+
+  margin: 0;
+  padding-bottom: 1rem;
+
+  @media only screen and (max-width: 57.5em) {
+    font-size: 1.5rem;
+    padding-bottom: 1rem;
+  }
+}
+
 .gameOver-Button {
   font-family: "Sono", sans-serif;
-  color: beige;
+  color: black;
   font-weight: 500;
 
   background-color: #c81c11;
@@ -196,7 +212,7 @@
 
 .gameStart-Button {
   font-family: "Sono", sans-serif;
-  color: beige;
+  color: black;
   font-weight: 500;
 
   background-color: #c81c11;
