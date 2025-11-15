@@ -234,7 +234,7 @@ const Scene: FC<SceneProps> = ({
           <primitive
             object={scene}
             scale={1}
-            position={[0, 1.2, 2.3]}
+            position={[0, 1.2, 5]}
             onClick={handleClick}
             onPointerOver={() => setHovered(true)}
             onPointerOut={() => setHovered(false)}
