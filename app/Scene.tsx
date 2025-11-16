@@ -118,11 +118,9 @@ const Scene: FC<SceneProps> = ({
 
       if (!dollarSign) return;
 
-      if (elapsed < 500) {
-        // Show for 0.5 seconds
+      if (elapsed < 700) {
         dollarSign.visible = true;
       } else {
-        // Hide after 0.5 seconds
         dollarSign.visible = false;
 
         // Remove from visible dollars
@@ -297,8 +295,6 @@ const Scene: FC<SceneProps> = ({
             onPointerOut={() => setHovered(false)}
           />
         </group>
-
-        {/* Waiter is already in the scene, no need to add a new mesh */}
       </Physics>
     </>
   );
