@@ -2,6 +2,9 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Climate+Crisis&family=Sono:wght@300;400;500;800&display=swap");
 
+body {
+  background-color: #261301;
+}
 .loading-Font {
   font-size: 62.5%;
   font-family: "Sono", sans-serif;

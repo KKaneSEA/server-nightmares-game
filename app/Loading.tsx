@@ -9,10 +9,10 @@ const Loading: FC = () => {
       <Text
         anchorX="center"
         anchorY="middle"
-        position={[0, 50.5, 10] as THREE.Vector3Tuple}
+        position={[1, -33.5, -35] as THREE.Vector3Tuple}
         // position={[0, 0, -5]}
         color="beige"
-        fontSize={1}
+        fontSize={12}
       >
         LOADING...
       </Text>
