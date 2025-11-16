@@ -5,6 +5,14 @@
 body {
   background-color: #261301;
 }
+
+@supports (-webkit-touch-callout: none) {
+  .gameStart-Button,
+  .gameOver-Button {
+    border: 1px solid rgba(0, 0, 0, 0.2); /* subtle instead of none */
+  }
+}
+
 .loading-Font {
   font-size: 62.5%;
   font-family: "Sono", sans-serif;
