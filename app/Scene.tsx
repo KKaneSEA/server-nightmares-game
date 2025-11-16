@@ -42,6 +42,14 @@ const Scene: FC<SceneProps> = ({
 
   const emptyTablesRef = useRef<Record<number, any>>({});
 
+  // +++ Store references to dollar signs
+  const dollarSignsRef = useRef<Record<number, any>>({});
+
+  // +++ Track which dollar signs should be visible and their fade timers
+  const [visibleDollars, setVisibleDollars] = useState<Record<number, number>>(
+    {}
+  );
+
   const { scene, animations } = useGLTF("/models/restaurantscene.glb");
   const { actions, names } = useAnimations(animations, groupRef);
 
@@ -51,26 +59,39 @@ const Scene: FC<SceneProps> = ({
         child.castShadow = true;
         child.receiveShadow = true;
 
-        // +++ Find and assign the Waiter_Vest mesh directly
+        // Find and assign the Waiter_Vest mesh directly
         if (child.name === "Waiter_Vest") {
           waiterRef.current = child;
           console.log("Found Waiter_Vest at:", child.position);
         }
       }
 
-      // +++ Find EmptyTable objects and store references to them
+      // Find EmptyTable objects and store references to them
       if (child.name.match(/^EmptyTable[1-6]$/)) {
         const tableNumber = parseInt(child.name.replace("EmptyTable", ""));
         emptyTablesRef.current[tableNumber] = child;
+        console.log(`Found ${child.name}`);
+      }
+
+      // +++ Find Dollar_Sign objects and store references
+      if (child.name.match(/^Dollar_Sign[1-6]$/)) {
+        const dollarNumber = parseInt(child.name.replace("Dollar_Sign", ""));
+        dollarSignsRef.current[dollarNumber] = child;
+        // Hide initially
+        child.visible = false;
         console.log(`Found ${child.name}`);
       }
     });
   }, [scene]);
 
   useEffect(() => {
+    // +++ Play both number and dollar sign animations
     const numberAnimations = names.filter((name) => name.includes("Number_"));
+    const dollarAnimations = names.filter((name) =>
+      name.includes("Dollar_Sign")
+    );
 
-    numberAnimations.forEach((animName) => {
+    [...numberAnimations, ...dollarAnimations].forEach((animName) => {
       const action = actions[animName];
       if (action) {
         action.reset();
@@ -78,12 +99,41 @@ const Scene: FC<SceneProps> = ({
       }
     });
 
-    console.log("Playing animations:", numberAnimations);
+    console.log("Playing animations:", [
+      ...numberAnimations,
+      ...dollarAnimations,
+    ]);
   }, [actions, names]);
 
   useEffect(() => {
     document.body.style.cursor = hovered ? "pointer" : "auto";
   }, [hovered]);
+
+  // +++ Handle dollar sign visibility (0.5 seconds)
+  useFrame(() => {
+    Object.entries(visibleDollars).forEach(([dollarNum, startTime]) => {
+      const elapsed = Date.now() - startTime;
+      const dollarNumber = parseInt(dollarNum);
+      const dollarSign = dollarSignsRef.current[dollarNumber];
+
+      if (!dollarSign) return;
+
+      if (elapsed < 500) {
+        // Show for 0.5 seconds
+        dollarSign.visible = true;
+      } else {
+        // Hide after 0.5 seconds
+        dollarSign.visible = false;
+
+        // Remove from visible dollars
+        setVisibleDollars((prev) => {
+          const updated = { ...prev };
+          delete updated[dollarNumber];
+          return updated;
+        });
+      }
+    });
+  });
 
   useFrame(() => {
     if (!waiterRef.current) return;
@@ -162,6 +212,13 @@ const Scene: FC<SceneProps> = ({
       // Only add to waiter queue if it matches the current request
       if (currentRequest && currentRequest.table === tableNumber) {
         setWaiterQueue((prev) => [...prev, tableNumber]);
+
+        // +++ Show the corresponding dollar sign
+        setVisibleDollars((prev) => ({
+          ...prev,
+          [tableNumber]: Date.now(),
+        }));
+
         onTableClick(tableNumber);
       }
     }
