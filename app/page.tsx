@@ -14,7 +14,6 @@ import {
   useKeyboardControls,
 } from "@react-three/drei";
 import {
-  Debug,
   RigidBody,
   Physics,
   CylinderCollider,
