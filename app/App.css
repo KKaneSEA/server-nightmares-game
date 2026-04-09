@@ -136,6 +136,9 @@ body {
   max-width: 100%;
   background-color: #261301;
 
+  touch-action: none;
+  overscroll-behavior: none;
+
   @media only screen and (max-width: 67.5em) {
     align-items: start;
   }
@@ -148,6 +151,7 @@ body {
   width: 70%;
   height: 90%;
   background-color: #261301;
+  touch-action: none;
 
   @media only screen and (max-width: 67.5em) {
     height: 70%;
