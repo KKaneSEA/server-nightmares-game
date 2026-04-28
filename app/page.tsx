@@ -154,7 +154,7 @@ const Home: React.FC = () => {
               if (typeof window !== "undefined") {
                 localStorage.setItem(
                   "serverNightmaresHighScore",
-                  finalTime.toString()
+                  finalTime.toString(),
                 );
               }
             }
@@ -284,6 +284,16 @@ const Home: React.FC = () => {
             </Canvas>
           )}
         </div>
+      </div>
+      <div className="made-Link">
+        Made by
+        <a
+          href="https://kaylakane.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Kayla Kane
+        </a>
       </div>
     </div>
   );

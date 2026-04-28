@@ -32,6 +32,30 @@ body {
   -ms-user-select: none;
 }
 
+.made-Link {
+  display: flex;
+  flex-direction: row;
+  height: 2rem;
+  justify-content: flex-end;
+  color: #c81c11;
+  font-weight: 300;
+  padding-right: 2rem;
+  gap: 4px;
+}
+
+.made-Link a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.made-Link a:hover {
+  text-decoration: underline;
+}
+
+.made-Link a:visited {
+  color: inherit;
+}
+
 .game-Header {
   display: flex !important;
   flex-direction: column;
