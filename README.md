@@ -2,7 +2,7 @@
 
 A fast-paced 3D restaurant simulation game where you play as a waiter trying to keep up with an endless stream of demanding guests. Built with Next.js, React Three Fiber, and physics.
 
-**[Play it live →](http://localhost:3000)**
+**[Play it live →](https://server-nightmares.vercel.app/)**
 
 ## About the Game
 
